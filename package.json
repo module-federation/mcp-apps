@@ -5,6 +5,7 @@
   "description": "MCP Apps Server for rendering Module Federation components as interactive UIs in AI Agents",
   "license": "MIT",
   "author": "fengdanping@bytedance.com",
+  "packageManager": "pnpm@10.6.5",
   "keywords": [
     "mcp",
     "mcp-apps",
