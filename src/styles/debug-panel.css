@@ -1,0 +1,189 @@
+/* 调试面板样式 */
+
+/* 状态面板 */
+.debug-status-panel {
+  padding: 12px;
+  background-color: #f0f9ff;
+  border: 2px solid #0284c7;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #0c4a6e;
+}
+
+.debug-status-title {
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.debug-status-items {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.debug-status-error {
+  color: #dc2626;
+  font-weight: bold;
+}
+
+/* 日志面板 */
+.debug-log-panel {
+  padding: 12px;
+  background-color: #1e293b;
+  border: 2px solid #475569;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 11px;
+  color: #e2e8f0;
+  font-family: monospace;
+  max-height: 300px;
+  overflow: hidden;
+}
+
+.debug-log-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #fbbf24;
+}
+
+.debug-log-content {
+  max-height: 250px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.debug-log-item {
+  margin-bottom: 2px;
+}
+
+.debug-log-item.error {
+  color: #fca5a5;
+}
+
+.debug-log-item.success {
+  color: #86efac;
+}
+
+.debug-log-item.info {
+  color: #93c5fd;
+}
+
+.debug-log-empty {
+  color: #64748b;
+  font-style: italic;
+}
+
+/* 工具栏 */
+.debug-toolbar {
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.debug-toolbar-btn {
+  padding: 6px 12px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.debug-toolbar-btn.test {
+  background-color: #0284c7;
+}
+
+.debug-toolbar-btn.stats {
+  background-color: #8b5cf6;
+}
+
+/* 配置详情面板 */
+.debug-config-panel {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.debug-config-title {
+  font-weight: 600;
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.debug-tool-info {
+  margin-top: 12px;
+  padding-bottom: 12px;
+}
+
+.debug-tool-info.has-border {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.debug-tool-label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.debug-tool-content {
+  font-size: 11px;
+  color: #64748b;
+  margin-left: 8px;
+}
+
+.debug-tool-args {
+  margin-top: 8px;
+}
+
+.debug-tool-args-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.debug-tool-args-code {
+  margin-top: 4px;
+  background-color: #1e293b;
+  color: #e2e8f0;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  overflow: auto;
+  font-family: monospace;
+  max-height: 150px;
+}
+
+/* MF 配置面板 */
+.debug-mf-config {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #1e293b;
+  color: #e2e8f0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.debug-mf-config-title {
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #fbbf24;
+}

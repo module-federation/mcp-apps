@@ -1,0 +1,96 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MCP Apps Configuration",
+  "description": "Configuration for MCP tools that render Module Federation components",
+  "type": "object",
+  "required": ["remotes", "tools"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Configuration version"
+    },
+    "remotes": {
+      "type": "array",
+      "description": "Module Federation remotes configuration",
+      "items": {
+        "type": "object",
+        "required": ["name", "version", "baseUrl", "csp"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Remote name (e.g., @cloud-public/goofy-deploy)"
+          },
+          "version": {
+            "type": "string",
+            "description": "Remote version"
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Base URL for the remote (without version/locale)"
+          },
+          "locale": {
+            "type": "string",
+            "default": "cn",
+            "description": "Locale/region for the remote"
+          },
+          "csp": {
+            "type": "object",
+            "description": "Content Security Policy configuration",
+            "required": ["connectDomains", "resourceDomains"],
+            "properties": {
+              "connectDomains": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Allowed domains for fetch/XHR"
+              },
+              "resourceDomains": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Allowed domains for loading resources"
+              }
+            }
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "List of MCP tools",
+      "items": {
+        "type": "object",
+        "required": ["name", "title", "description", "remote", "module"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Unique tool identifier (snake_case recommended)"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable tool name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Tool description for the AI model"
+          },
+          "inputSchema": {
+            "type": "object",
+            "description": "JSON Schema for tool input parameters"
+          },
+          "remote": {
+            "type": "string",
+            "description": "Remote name reference (from remotes object)"
+          },
+          "module": {
+            "type": "string",
+            "description": "Exposed module path (e.g., ./ComponentName)"
+          },
+          "exportName": {
+            "type": "string",
+            "default": "default",
+            "description": "Export name from the module"
+          }
+        }
+      }
+    }
+  }
+}

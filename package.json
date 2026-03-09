@@ -1,0 +1,79 @@
+{
+  "name": "@module-federation/mcp-apps",
+  "version": "0.0.2-beta.6",
+  "type": "module",
+  "description": "MCP Apps Server for rendering Module Federation components as interactive UIs in AI Agents",
+  "license": "MIT",
+  "author": "fengdanping@bytedance.com",
+  "keywords": [
+    "mcp",
+    "mcp-apps",
+    "mcp-server",
+    "module-federation",
+    "micro-frontend",
+    "remote-components",
+    "dynamic-import"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/module-federation/mcp-apps.git",
+    "directory": "packages/module-federation-mcp"
+  },
+  "homepage": "https://github.com/module-federation/mcp-apps#readme",
+  "bugs": {
+    "url": "https://github.com/module-federation/mcp-apps/issues"
+  },
+  "main": "dist/server.js",
+  "types": "dist/server.d.ts",
+  "bin": {
+    "mf-mcp-server": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "skills",
+    ".claude-plugin",
+    "mcp_apps.schema.json",
+    "mcp_apps.example.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "default": "./dist/types.js"
+    }
+  },
+  "scripts": {
+    "build": "rm -rf dist/ && npm run build:ui && tsc && chmod +x dist/index.js",
+    "build:check": "tsc --noEmit && npm run build:ui && tsc && chmod +x dist/index.js",
+    "build:ui": "rsbuild build && rsbuild build --config rsbuild.shell.config.ts",
+    "watch:ui": "rsbuild build --watch",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js --config module-federation-examples/basic/mcp_apps.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@module-federation/enhanced": "^2.0.1",
+    "@modelcontextprotocol/ext-apps": "^1.1.2",
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "express": "^5.0.0",
+    "react": "~18.3.1",
+    "react-dom": "~18.3.1",
+    "zod": "^4.0.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "~18.3.1",
+    "@types/react-dom": "~18.3.1",
+    "@rsbuild/core": "^1.4.0",
+    "@rsbuild/plugin-react": "^1.4.0",
+    "typescript": "^5.7.3"
+  }
+}

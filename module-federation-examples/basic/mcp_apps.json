@@ -1,0 +1,82 @@
+{
+  "$schema": "./mcp_apps.schema.json",
+  "remotes": [
+    {
+      "name": "demo_provider",
+      "version": "latest",
+      "baseUrl": "http://localhost:8080",
+      "locale": "en",
+      "csp": {
+        "connectDomains": ["http://localhost:8080", "https://httpbin.org"],
+        "resourceDomains": ["http://localhost:8080", "https://module-federation.io"]
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "deploy_wizard_step1",
+      "title": "Deploy Wizard Step 1: Select Application",
+      "description": "First step of the deploy wizard. Shows an application selection UI for the user to choose an app and target environment. After confirmation, the component automatically triggers deploy_wizard_step2 and passes the collected data (appId, appName, env, deployNote). Do NOT manually call deploy_wizard_step2 — it is triggered automatically by this component.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apps": {
+            "type": "array",
+            "description": "Optional: preset list of applications. Falls back to built-in demo data if not provided.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "env": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "remote": "demo_provider",
+      "module": "./DeployWizardStep1",
+      "exportName": "default"
+    },
+    {
+      "name": "deploy_wizard_step2",
+      "title": "Deploy Wizard Step 2: Confirm Configuration",
+      "description": "Second step of the deploy wizard. Triggered automatically by deploy_wizard_step1 — do NOT call directly. Receives application info from Step 1 (appId, appName, env, deployNote, confirmedAt), lets the user fill in a deploy version tag, and configure rollback and notification options. Automatically triggers deploy_wizard_step3 on confirmation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "appId": { "type": "string", "description": "From Step 1: application ID" },
+          "appName": { "type": "string", "description": "From Step 1: application name" },
+          "env": { "type": "string", "description": "From Step 1: deployment environment" },
+          "deployNote": { "type": "string", "description": "From Step 1: deployment note" },
+          "confirmedAt": { "type": "string", "description": "From Step 1: confirmation timestamp" }
+        }
+      },
+      "remote": "demo_provider",
+      "module": "./DeployWizardStep2",
+      "exportName": "default"
+    },
+    {
+      "name": "deploy_wizard_step3",
+      "title": "Deploy Wizard Step 3: Deployment Progress",
+      "description": "Third step of the deploy wizard. Triggered automatically by deploy_wizard_step2 — do NOT call directly. Receives all data from Step 1 and Step 2, simulates the deployment process, and displays progress. Sends a full deployment report to the agent on completion.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "appId": { "type": "string" },
+          "appName": { "type": "string" },
+          "env": { "type": "string" },
+          "deployNote": { "type": "string" },
+          "confirmedAt": { "type": "string" },
+          "deployTag": { "type": "string", "description": "From Step 2: version tag" },
+          "rollbackEnabled": { "type": "boolean", "description": "From Step 2: auto-rollback enabled" },
+          "notifySlack": { "type": "boolean", "description": "From Step 2: Slack notification enabled" },
+          "submittedAt": { "type": "string", "description": "From Step 2: submission timestamp" }
+        }
+      },
+      "remote": "demo_provider",
+      "module": "./DeployWizardStep3",
+      "exportName": "default"
+    }
+  ]
+}

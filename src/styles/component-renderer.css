@@ -1,0 +1,45 @@
+/* Component error display styles */
+.component-error-container {
+  border: 2px solid #dc2626;
+  border-radius: 8px;
+  padding: 24px;
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.component-error-icon {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.component-error-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.component-error-message {
+  font-size: 13px;
+  font-family: monospace;
+  background-color: white;
+  padding: 12px;
+  border-radius: 4px;
+}
+
+.component-error-stack {
+  font-size: 11px;
+  margin-top: 12px;
+}
+
+.component-error-stack-summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.component-error-stack-pre {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: white;
+  border-radius: 4px;
+  overflow: auto;
+}

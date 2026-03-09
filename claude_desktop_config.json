@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "module-federation": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/module-federation-mcp/dist/index.js",
+        "--config",
+        "/absolute/path/to/your/mcp_apps.json",
+        "--stdio"
+      ]
+    }
+  }
+}
