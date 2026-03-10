@@ -11,7 +11,7 @@ Bridge your existing Module Federation remotes to AI-native interactive UIs via 
 - ✅ CSP configuration support
 - ✅ AI-friendly Skills for configuration management
 
-<video src="https://github.com/user-attachments/assets/47b9601a-d9a0-47da-a97f-1d0b763aa6f8" controls width="100%"></video>
+<video src="https://github.com/user-attachments/assets/8c9647ce-0398-41e3-b69d-f9fb420c31b5" controls width="100%"></video>
 
 ## Why Module Federation + MCP Apps
 
