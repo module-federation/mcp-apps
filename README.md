@@ -50,14 +50,19 @@ In short: MF provides the UI delivery infrastructure that MCP Apps needs, withou
 │  MF MCP Server      │
 │  - Load config      │
 │  - Register tools   │
-│  - Generate URLs    │
+│  - Generate         │
+│    ui://mf/<slug>   │
+│    resource URIs    │
 └────────┬────────────┘
-         │ Returns URL
+         │ Returns resource URI (ui://mf/<slug>)
+         │ Host fetches HTML for that URI
          ▼
 ┌──────────────────────┐
-│ mf_render_container  │ (iframe src)
-│  - Load MF modules   │
-│  - Render components │
+│ mf_render_container  │ (rendered as iframe)
+│  - Load MF remote    │
+│    from CDN          │
+│  - Render component  │
+│    with tool input   │
 └──────────────────────┘
 ```
 
