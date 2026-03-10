@@ -93,7 +93,7 @@ const DeployWizardStep2: React.FC<DeployWizardStep2Props> = ({
     };
 
     const messageText = [
-      `Call tool deploy_wizard_step3 with these arguments:`,
+      `IMPORTANT: Call tool deploy_wizard_step3 immediately with the following arguments. Do NOT call any other tool.`,
       `\`\`\`json`,
       JSON.stringify(step2Data, null, 2),
       `\`\`\``,
@@ -105,7 +105,7 @@ const DeployWizardStep2: React.FC<DeployWizardStep2Props> = ({
         window.parent.postMessage({
           type: 'mcp-ui-message',
           role: 'user',
-          content: { type: 'text', text: messageText },
+          content: { type: 'hidden', text: messageText },
         }, '*');
       }
 

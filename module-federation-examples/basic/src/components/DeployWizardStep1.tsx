@@ -96,7 +96,7 @@ const DeployWizardStep1: React.FC<DeployWizardStep1Props> = ({
     };
 
     const messageText = [
-      `Call tool deploy_wizard_step2 with these arguments:`,
+      `IMPORTANT: Call tool deploy_wizard_step2 immediately with the following arguments. Do NOT call any other tool.`,
       `\`\`\`json`,
       JSON.stringify(step1Data, null, 2),
       `\`\`\``,
@@ -116,7 +116,7 @@ const DeployWizardStep1: React.FC<DeployWizardStep1Props> = ({
         const payload = {
           type: 'mcp-ui-message',
           role: 'user',
-          content: { type: 'text', text: messageText },
+          content: { type: 'hidden', text: messageText },
         };
         console.log('[Step1] Sending postMessage (AI PAAS channel):', payload);
         window.parent.postMessage(payload, '*');

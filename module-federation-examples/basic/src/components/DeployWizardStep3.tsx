@@ -115,33 +115,26 @@ const DeployWizardStep3: React.FC<DeployWizardStep3Props> = ({
     setReportSent(true);
 
     const totalTime = DEPLOY_STAGES.reduce((acc, s) => acc + s.duration, 0);
-    const report = {
-      success: !hasFailed,
-      appId,
-      appName,
-      env,
-      deployTag,
-      deployNote,
-      totalDurationMs: totalTime,
-      stages: DEPLOY_STAGES.map(s => ({ id: s.id, label: s.label, durationMs: s.duration })),
-      rollbackEnabled,
-      notifySlack,
-      completedAt: new Date().toISOString(),
-    };
 
     const messageText = [
-      `Deployment complete! Please summarize the result and inform the user.`,
+      `Deployment of **${appName}** to **${env}** is complete (tag: ${deployTag}).`,
+      `Please give the user a brief text summary of the result. Do NOT call any tools.`,
       ``,
-      `Full deploy report:`,
-      `\`\`\`json`,
-      JSON.stringify(report, null, 2),
-      `\`\`\``,
+      `Deploy report:`,
+      `- App: ${appName} (${appId})`,
+      `- Environment: ${env}`,
+      `- Version tag: ${deployTag}`,
+      `- Auto rollback: ${rollbackEnabled ? 'enabled' : 'disabled'}`,
+      `- Slack notify: ${notifySlack ? 'enabled' : 'disabled'}`,
+      `- Deploy note: ${deployNote || '(none)'}`,
+      `- Total duration: ${(totalTime / 1000).toFixed(1)}s`,
+      `- Status: ${hasFailed ? '❌ FAILED' : '✅ SUCCESS'}`,
     ].join('\n');
 
-    // Dual-channel: postMessage for AI PAAS iframe, sendMessage for Claude Desktop
+    // postMessage → AI PAAS (hidden: not shown in UI, Agent gives a text summary only)
     if (canPostMessage) {
       window.parent.postMessage(
-        { type: 'mcp-ui-message', role: 'user', content: { type: 'text', text: messageText } },
+        { type: 'mcp-ui-message', role: 'user', content: { type: 'hidden', text: messageText } },
         '*'
       );
     }
