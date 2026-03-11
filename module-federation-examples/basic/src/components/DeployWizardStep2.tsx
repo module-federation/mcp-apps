@@ -92,27 +92,22 @@ const DeployWizardStep2: React.FC<DeployWizardStep2Props> = ({
       submittedAt: new Date().toISOString(),
     };
 
-    const messageText = [
-      `IMPORTANT: Call tool deploy_wizard_step3 immediately with the following arguments. Do NOT call any other tool.`,
-      `\`\`\`json`,
-      JSON.stringify(step2Data, null, 2),
-      `\`\`\``,
-    ].join('\n');
+    const msgText = `[Deploy Wizard] Step 2 done → call deploy_wizard_step3(appId="${appId}", appName="${appName}", env="${env}", deployTag="${step2Data.deployTag}", rollbackEnabled=${step2Data.rollbackEnabled}, notifySlack=${step2Data.notifySlack}, confirmedAt="${confirmedAt ?? ''}", submittedAt="${step2Data.submittedAt}"${deployNote ? `, deployNote="${deployNote}"` : ''})`;
 
     try {
-      // Dual-channel: postMessage for AI PAAS, sendMessage for Claude Desktop
+      // Dual-channel: both use same compact text; AI PAAS hidden (not shown in UI), Claude Desktop visible
       if (window.parent !== window) {
         window.parent.postMessage({
           type: 'mcp-ui-message',
           role: 'user',
-          content: { type: 'hidden', text: messageText },
+          content: { type: 'hidden', text: msgText },
         }, '*');
       }
 
       if (mcpApp?.sendMessage) {
         const result = await mcpApp.sendMessage({
           role: 'user',
-          content: [{ type: 'text', text: messageText }],
+          content: [{ type: 'text', text: msgText }],
         });
         if (result?.isError) {
           setStatus('error');

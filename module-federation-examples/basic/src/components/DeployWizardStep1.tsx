@@ -95,28 +95,18 @@ const DeployWizardStep1: React.FC<DeployWizardStep1Props> = ({
       confirmedAt: new Date().toISOString(),
     };
 
-    const messageText = [
-      `IMPORTANT: Call tool deploy_wizard_step2 immediately with the following arguments. Do NOT call any other tool.`,
-      `\`\`\`json`,
-      JSON.stringify(step1Data, null, 2),
-      `\`\`\``,
-    ].join('\n');
+    const msgText = `[Deploy Wizard] Step 1 done → call deploy_wizard_step2(appId="${step1Data.appId}", appName="${step1Data.appName}", env="${step1Data.env}", confirmedAt="${step1Data.confirmedAt}"${step1Data.deployNote ? `, deployNote="${step1Data.deployNote}"` : ''})`;
 
-    console.log('[Step1] messageText to send:\n', messageText);
+    console.log('[Step1] msgText:', msgText);
 
     try {
-      // Dual-channel strategy:
-      // - postMessage → AI PAAS (parent frame listens for mcp-ui-message)
-      // - sendMessage → Claude Desktop (triggers real MCP sampling → LLM)
-      // Both are fired when available; each host only handles what it recognises.
-      // Claude Desktop ignores unknown postMessage types; AI PAAS sendMessage only ACKs (safe to ignore).
       let channelUsed = false;
 
       if (window.parent !== window) {
         const payload = {
           type: 'mcp-ui-message',
           role: 'user',
-          content: { type: 'hidden', text: messageText },
+          content: { type: 'hidden', text: msgText },
         };
         console.log('[Step1] Sending postMessage (AI PAAS channel):', payload);
         window.parent.postMessage(payload, '*');
@@ -127,7 +117,7 @@ const DeployWizardStep1: React.FC<DeployWizardStep1Props> = ({
         console.log('[Step1] Calling mcpApp.sendMessage (Claude Desktop channel)');
         const result = await mcpApp.sendMessage({
           role: 'user',
-          content: [{ type: 'text', text: messageText }],
+          content: [{ type: 'text', text: msgText }],
         });
         console.log('[Step1] sendMessage result:', result);
         if (result?.isError) {

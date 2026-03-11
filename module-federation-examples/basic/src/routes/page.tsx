@@ -84,7 +84,7 @@ const Index = () => (
             <div className="step-num">2</div>
             <div>
               <div className="step-label">Register in claude_desktop_config.json</div>
-              <code className="code-block">{`"command": "npx", "args": ["-y", "@module-federation/mcp-server@latest", "--config", "<path>/mcp_apps.json", "--stdio"]`}</code>
+              <code className="code-block">{`"command": "npx", "args": ["-y", "@module-federation/mcp-apps@latest", "--config", "<path>/mcp_apps.json", "--stdio"]`}</code>
             </div>
           </div>
           <div className="step">
@@ -99,7 +99,7 @@ const Index = () => (
     </main>
 
     <footer className="footer">
-      <a href="https://github.com/module-federation/mcp-server" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="https://github.com/module-federation/mcp-apps" target="_blank" rel="noreferrer">GitHub</a>
       <span className="sep">·</span>
       <a href="https://modelcontextprotocol.io/docs/extensions/apps" target="_blank" rel="noreferrer">MCP Apps Spec</a>
       <span className="sep">·</span>

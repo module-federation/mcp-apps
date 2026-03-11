@@ -68,7 +68,7 @@ In short: MF provides the UI delivery infrastructure that MCP Apps needs, withou
 
 ## Requirements
 
-- **Node.js 18+**
+- **Node.js 22+**
 - Claude Desktop (or any MCP host that supports the MCP Apps spec)
 
 ## Compatibility
@@ -102,7 +102,7 @@ Then register the MCP server with Claude Desktop — edit `~/Library/Application
       "command": "npx",
       "args": [
         "-y",
-        "https://pkg.pr.new/@module-federation/mcp-apps@29a2cc7",
+        "@module-federation/mcp-apps@latest",
         "--config",
         "/absolute/path/to/module-federation-mcp/module-federation-examples/basic/mcp_apps.json",
         "--stdio"
@@ -123,13 +123,13 @@ Then register the MCP server with Claude Desktop — edit `~/Library/Application
 >       "command": "/Users/you/.nvm/versions/node/v22.21.1/bin/npx",
 >       "args": [
 >         "-y",
->         "https://pkg.pr.new/@module-federation/mcp-apps@29a2cc7",
+>         "@module-federation/mcp-apps@latest",
 >         "--config",
 >         "/absolute/path/to/module-federation-mcp/module-federation-examples/basic/mcp_apps.json",
 >         "--stdio"
 >       ],
 >       "env": {
->         "PATH": "/Users/you/.nvm/versions/node/v22.21.1/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
+>         "PATH": "/Users/you/.nvm/versions/node/v22.21.1/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 >       }
 >     }
 >   }
@@ -247,7 +247,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "npx",
       "args": [
         "-y",
-        "https://pkg.pr.new/@module-federation/mcp-apps@29a2cc7",
+        "@module-federation/mcp-apps@latest",
         "--config",
         "/absolute/path/to/mcp_apps.json",
         "--stdio"
@@ -268,13 +268,13 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 >       "command": "/Users/you/.nvm/versions/node/v22.21.1/bin/npx",
 >       "args": [
 >         "-y",
->         "https://pkg.pr.new/@module-federation/mcp-apps@29a2cc7",
+>         "@module-federation/mcp-apps@latest",
 >         "--config",
 >         "/absolute/path/to/mcp_apps.json",
 >         "--stdio"
 >       ],
 >       "env": {
->         "PATH": "/Users/you/.nvm/versions/node/v22.21.1/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
+>         "PATH": "/Users/you/.nvm/versions/node/v22.21.1/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 >       }
 >     }
 >   }
