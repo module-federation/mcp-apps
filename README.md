@@ -451,6 +451,33 @@ The server also supports HTTP mode for agent frameworks that run the MCP client 
 
 ---
 
+## Documentation
+
+### Getting started
+
+| Document | Description |
+|---|---|
+| [Quick Start](./docs/en/01-quick-start.md) | Set up your first MF MCP tool in 5 minutes |
+| [Component Guide](./docs/en/02-component-guide.md) | Build MCP-aware React components with `useMcpApp` |
+| [Advanced Features](./docs/en/03-advanced.md) | `callServerTool`, `requestDisplayMode`, multi-step wizards |
+| [Configuration Reference](./docs/en/04-config-reference.md) | Full `mcp_apps.json` schema reference |
+
+### Integration guides
+
+| Document | Audience | Language |
+|---|---|---|
+| [AI PAAS Integration Guide](./docs/ai-paas-integration-guide.mdx) | ByteDance internal — AI PAAS (LangGraph) | English |
+| [AI PAAS 接入指南](./docs/ai-paas-integration-guide.zh-CN.mdx) | 字节内部 — AI PAAS (LangGraph) | 中文 |
+
+### Blog
+
+| Document | Language |
+|---|---|
+| [Introducing @module-federation/mcp-apps](./docs/blog-introducing-mcp-apps.mdx) | English |
+| [介绍 @module-federation/mcp-apps](./docs/blog-introducing-mcp-apps.zh-CN.mdx) | 中文 |
+
+---
+
 ## Related
 
 - [MCP Apps SDK](https://github.com/modelcontextprotocol/ext-apps)

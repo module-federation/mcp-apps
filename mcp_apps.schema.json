@@ -14,7 +14,7 @@
       "description": "Module Federation remotes configuration",
       "items": {
         "type": "object",
-        "required": ["name", "version", "baseUrl", "csp"],
+        "required": ["name", "baseUrl", "csp"],
         "properties": {
           "name": {
             "type": "string",
@@ -22,16 +22,26 @@
           },
           "version": {
             "type": "string",
-            "description": "Remote version"
+            "description": "Remote version (informational only, not used in URL construction)"
           },
           "baseUrl": {
             "type": "string",
-            "description": "Base URL for the remote (without version/locale)"
+            "description": "Full manifest URL for the remote (e.g. https://example.com/mf-manifest.json or vmok-manifest.json)"
+          },
+          "manifestType": {
+            "type": "string",
+            "enum": ["mf", "vmok"],
+            "default": "mf",
+            "description": "Manifest format: 'mf' for standard Module Federation, 'vmok' for ByteDance-internal vmok format"
+          },
+          "snapshotUrl": {
+            "type": "string",
+            "description": "Optional vmok snapshot URL. If omitted, auto-derived from baseUrl by replacing vmok-manifest.json with vmok-snapshot.json"
           },
           "locale": {
             "type": "string",
             "default": "cn",
-            "description": "Locale/region for the remote"
+            "description": "Locale/region (informational only)"
           },
           "csp": {
             "type": "object",

@@ -3,9 +3,7 @@
   "remotes": [
     {
       "name": "demo_provider",
-      "version": "latest",
-      "baseUrl": "http://localhost:8080",
-      "locale": "en",
+      "baseUrl": "http://localhost:8080/mf-manifest.json",
       "csp": {
         "connectDomains": ["http://localhost:8080", "https://httpbin.org"],
         "resourceDomains": ["http://localhost:8080", "https://module-federation.io"]

@@ -146,18 +146,8 @@ export async function createServer({ configPath, devMode = false, shellBaseUrl }
         };
       }
 
-      const { version, baseUrl, locale = 'en', manifestType = 'mf' } = remoteConfig;
-      let remoteEntry: string;
-      let snapshotUrl: string | undefined;
-      if (manifestType === 'mf') {
-        remoteEntry = `${baseUrl}/mf-manifest.json`;
-        snapshotUrl = undefined;
-      } else {
-        // Legacy snapshot mode: preloads module metadata to avoid runtime manifest fetches.
-        // Path convention: <baseUrl>/<version>/<locale>/vmok-manifest.json
-        remoteEntry = `${baseUrl}/${version}/${locale}/vmok-manifest.json`;
-        snapshotUrl = `${baseUrl}/${version}/${locale}/vmok-snapshot.json`;
-      }
+      const { baseUrl, manifestType = 'mf', snapshotUrl } = remoteConfig;
+      const remoteEntry = baseUrl;
 
       const resourceConfig = {
         mimeType: 'text/html;profile=mcp-app',

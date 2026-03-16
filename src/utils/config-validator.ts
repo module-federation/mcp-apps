@@ -27,22 +27,17 @@ const RemoteConfigSchema = z.object({
   version: z.string().optional(),
   baseUrl: z.string().url('Invalid base URL format'),
   locale: z.string().optional().default('en'),
-  /** 'vmok' = legacy snapshot manifest, 'mf' = standard MF manifest (mf-manifest.json). Default: 'mf' */
+  /** 'vmok' = legacy snapshot manifest, 'mf' = standard MF manifest. Default: 'mf' */
   manifestType: z.enum(['vmok', 'mf']).optional().default('mf'),
+  /** Optional snapshot URL for vmok remotes. If omitted, mf-loader auto-derives it from baseUrl. */
+  snapshotUrl: z.string().url('Invalid snapshot URL format').optional(),
   csp: z.object({
     connectDomains: z.array(CspDomainSchema).min(1, 'At least one connect domain required'),
     resourceDomains: z.array(CspDomainSchema).min(1, 'At least one resource domain required'),
     frameDomains: z.array(CspDomainSchema).optional(),
     baseUriDomains: z.array(CspDomainSchema).optional(),
   }),
-}).refine(
-  (remote) => {
-    // version is required only for vmok remotes (embedded in the URL path)
-    if (remote.manifestType === 'vmok' && !remote.version) return false;
-    return true;
-  },
-  { message: 'version is required when manifestType is "vmok"', path: ['version'] }
-);
+});
 
 // Tool configuration schema
 const ToolConfigSchema = z.object({
