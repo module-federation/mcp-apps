@@ -1,12 +1,12 @@
 ---
-title: "Bringing Interactive UI into AI Conversations with Module Federation and MCP Apps"
+title: "Module Federation MCP Apps — Powering MCP Apps UI with Module Federation"
 date: "2026-03-12"
 authors: ["module-federation-team"]
 tags: ["mcp", "module-federation", "ai", "react", "micro-frontend"]
 description: "How @module-federation/mcp-apps lets you plug your existing frontend components directly into Claude, VS Code, and any MCP-compatible AI host — no extra build pipeline required."
 ---
 
-# Bringing Interactive UI into AI Conversations with Module Federation and MCP Apps
+# Module Federation MCP Apps — Powering MCP Apps UI with Module Federation
 
 AI assistants are no longer just text boxes. With the [MCP Apps](https://modelcontextprotocol.io/docs/extensions/apps) standard, AI hosts like Claude Desktop, VS Code, and Goose can **render real interactive UI components** inside a conversation. Forms, dashboards, wizards, pickers — all embedded in the chat.
 
@@ -136,13 +136,17 @@ Claude: "Start a deployment"
 The [MCP Apps SDK](https://github.com/modelcontextprotocol/ext-apps) gives your component a `sendMessage` function. When the user completes a step, your component sends a message back to the AI to continue the conversation or call the next tool:
 
 ```tsx
-import { useMcpApp } from '@modelcontextprotocol/ext-apps/react';
+// mcpApp is automatically injected as a prop by the MCP Apps framework — no extra dependencies needed
+interface McpApp {
+  sendMessage?: (params: {
+    role: string;
+    content: Array<{ type: string; text: string }>;
+  }) => Promise<{ isError?: boolean }>;
+}
 
-function DeployWizardStep1() {
-  const { sendMessage } = useMcpApp();
-
+function DeployWizardStep1({ mcpApp }: { mcpApp?: McpApp }) {
   const handleConfirm = async (data) => {
-    await sendMessage({
+    await mcpApp?.sendMessage({
       role: 'user',
       content: [{ type: 'text', text: `Deploy ${data.appName} to ${data.env}` }]
     });
@@ -251,20 +255,20 @@ The AI will read your `module-federation.config.ts`, detect package name and exp
 
 Or write it manually — the schema is simple (full reference below).
 
-### Step 3: Wire up the SDK in your component (optional)
+### Step 3: Enable two-way AI communication (optional)
 
-To enable two-way communication between your component and the AI, add `@modelcontextprotocol/ext-apps`:
-
-```bash
-pnpm add @modelcontextprotocol/ext-apps
-```
+`mcpApp` is **automatically injected as a prop** by the MCP Apps framework — no package installation required. Just declare it in your component's props:
 
 ```tsx
-import { useMcpApp } from '@modelcontextprotocol/ext-apps/react';
+// No imports needed — mcpApp is injected by the framework
+interface McpApp {
+  sendMessage?: (params: {
+    role: string;
+    content: Array<{ type: string; text: string }>;
+  }) => Promise<{ isError?: boolean }>;
+}
 
-export default function IncidentForm() {
-  const mcpApp = useMcpApp(); // undefined when not in MCP context → graceful fallback
-
+export default function IncidentForm({ mcpApp }: { mcpApp?: McpApp }) {
   const handleSubmit = async (incident) => {
     // Submit your incident...
     await fetch('/api/incidents', { method: 'POST', body: JSON.stringify(incident) });
@@ -282,7 +286,7 @@ export default function IncidentForm() {
 }
 ```
 
-The `useMcpApp()` hook returns `undefined` when the component is rendered outside an MCP host, so your existing UI keeps working everywhere.
+`mcpApp` is `undefined` when the component runs outside an MCP host, so your existing UI keeps working everywhere with zero changes.
 
 ### Step 4: Add to Claude Desktop (`mcp_apps.json`)
 
@@ -383,7 +387,7 @@ The HTTP server exposes:
 
 **Does my component need to be rewritten?**
 
-No. Any React component that currently lives in an MF remote works as-is. The `useMcpApp()` hook is optional and returns `undefined` outside of an MCP context, so existing behavior is preserved.
+No. Any React component that currently lives in an MF remote works as-is. The `mcpApp` prop is optional — it's `undefined` when the framework isn't present — so existing behavior is fully preserved.
 
 **What if the AI host doesn't support MCP Apps?**
 
