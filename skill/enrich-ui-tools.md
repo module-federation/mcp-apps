@@ -101,7 +101,7 @@ export interface UiRenderPayload {
  * @param toolInput       Arguments the tool was called with
  * @param callToolResultText  Serialized CallToolResult (the text content string)
  * @param mcpTools        Full tool list from tools/list
- * @param mcpServerBaseUrl  Public base URL of MCP Server, e.g. "http://localhost:3001"
+ * @param mcpServerBaseUrl  Public base URL of MCP Server, e.g. "http://localhost:3001/mcp-rpc"
  */
 export function detectAndEnrichUiTool(
   toolName: string,
@@ -190,7 +190,7 @@ for await (const event of agent.streamEvents(...)) {
       toolInput,
       callToolResultText,
       mcpTools,
-      'http://localhost:3001', // ← replace with your MCP Server URL
+      'http://localhost:3001/mcp-rpc', // ← replace with your MCP Server URL
     );
 
     if (uiPayload) {
@@ -220,7 +220,7 @@ async def stream_chat(user_input: str, agent, mcp_tools: list):
             # ← INSERT HERE
             ui_payload = detect_and_enrich_ui_tool(
                 tool_name, tool_input, call_tool_result_text,
-                mcp_tools, "http://localhost:3001",
+                mcp_tools, "http://localhost:3001/mcp-rpc",
             )
             if ui_payload:
                 yield {"type": "render_ui", "payload": ui_payload}
@@ -344,7 +344,7 @@ After wiring everything up:
 cd module-federation-mcp-starter && pnpm run start
 
 # 2. Verify a UI tool is listed and has _meta
-curl http://localhost:3001/mcp \
+curl http://localhost:3001/mcp-rpc/mcp \
   -H "Content-Type: application/json" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' \
   | jq '.result.tools[] | {name, _meta}'
@@ -366,10 +366,10 @@ curl -N http://localhost:3000/api/chat \
 
 **`iframeUrl` is a `localhost` the browser can't reach**
 - Set `mcpServerBaseUrl` to a publicly accessible URL (e.g. `https://mcp.example.com`). The browser fetches the iframe HTML directly — it cannot reach a server-side `localhost`.
-- In development, if frontend and backend share the same machine, `http://localhost:3001` works.
+- In development, if frontend and backend share the same machine, `http://localhost:3001/mcp-rpc` works.
 
 **`render_ui_resource` message is missing `callToolResult`**
-- Normalise `event.data.output` to a string before passing to `detectAndEnrichUiTool`. Different frameworks serialize `CallToolResult` differently (plain string, `{content: string}`, `{content: [{type:'text', text:...}]}`).
+- Normalise `event.data.output` to a string before passing to `detectAndEnrichUiTool`. Different frameworks serialize `CallToolResult` differently (plain string, `{content: string}`, `{content: [{type:'text', text:...}]}`)
 
 **UI tool appears but component doesn't render**
 - See `docs/zh/05-custom-agent-integration.md` Step 6 for frontend `McpAppRenderer` / AppBridge setup.
