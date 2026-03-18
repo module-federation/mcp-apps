@@ -3,10 +3,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 60vh;
-  background: linear-gradient(45deg, #3a65f2, #6a5acd, #8a2be2, #023cfc);
+  gap: 12px;
+  min-height: 60vh;
+  padding: 48px 32px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
   background-size: 400% 400%;
-  animation: gradientFlow 6s ease infinite;
+  animation: gradientFlow 8s ease infinite;
+  text-align: center;
 }
 
 .icon-container {
@@ -21,11 +24,52 @@
   transition: opacity 0.3s ease;
 }
 
+.badge {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.5);
+  color: #a5b4fc;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  animation: fadeInUp 0.6s ease-out;
+}
+
 .title {
-  font-size: 3rem;
+  font-size: 2.75rem;
+  font-weight: 700;
   color: #fff;
-  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  animation: fadeInUp 0.8s ease-out;
+  background: linear-gradient(90deg, #e0e7ff, #c7d2fe, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: rgba(165, 180, 252, 0.7);
+  max-width: 380px;
+  line-height: 1.6;
   animation: fadeInUp 1s ease-out;
+  margin: 0;
+}
+
+.version-tag {
+  margin-top: 8px;
+  padding: 4px 16px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  font-family: monospace;
+  animation: fadeInUp 1.2s ease-out;
 }
 
 @keyframes gradientFlow {
