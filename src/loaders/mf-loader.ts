@@ -1,8 +1,8 @@
 import { createInstance } from '@module-federation/enhanced/runtime';
 import * as reactExport from 'react';
 import * as reactDOMExport from 'react-dom';
-import { fixProtocolRelativeUrl } from './snapshot-loader';
-import { setupVmokManifest } from './vmok-loader';
+import { fixProtocolRelativeUrl } from './snapshot-loader.js';
+import { setupVmokManifest } from './vmok-loader.js';
 
 export interface ModuleFederationConfig {
   remoteName: string;

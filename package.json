@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/mcp-apps",
-  "version": "0.0.5-alpha.2",
+  "version": "0.0.5",
   "type": "module",
   "description": "MCP Apps Server for rendering Module Federation components as interactive UIs in AI Agents",
   "license": "MIT",
@@ -41,6 +41,10 @@
       "types": "./dist/server.d.ts",
       "default": "./dist/server.js"
     },
+    "./renderer": {
+      "types": "./dist/renderer.d.ts",
+      "default": "./dist/renderer.js"
+    },
     "./types": {
       "types": "./dist/types.d.ts",
       "default": "./dist/types.js"
@@ -52,6 +56,7 @@
   },
   "typesVersions": {
     "*": {
+      "renderer": ["./dist/renderer.d.ts"],
       "react": ["./dist/react/index.d.ts"],
       "types": ["./dist/types.d.ts"]
     }
@@ -78,7 +83,7 @@
     "react-dom": { "optional": true }
   },
   "dependencies": {
-    "@module-federation/enhanced": "^2.0.1",
+    "@module-federation/enhanced": "^2.2.1",
     "@modelcontextprotocol/ext-apps": "^1.1.2",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "express": "^5.0.0",

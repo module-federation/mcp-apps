@@ -4,12 +4,12 @@ interface DebugPanelProps {
   isConnected: boolean;
   app: any;
   showMFComponent: boolean;
-  isLoadingMF: boolean;
-  RemoteComponent: any;
-  mfError: string | null;
-  logs: string[];
-  currentTool: any;
-  resources: any[];
+  isLoadingMF?: boolean;
+  RemoteComponent?: any;
+  mfError?: string | null;
+  logs?: string[];
+  currentTool?: any;
+  resources?: any[];
 
   onToggle: () => void;
 }
@@ -18,12 +18,12 @@ export function DebugPanel({
   isConnected,
   app,
   showMFComponent,
-  isLoadingMF,
-  RemoteComponent,
-  mfError,
-  logs,
-  currentTool,
-  resources,
+  isLoadingMF = false,
+  RemoteComponent = null,
+  mfError = null,
+  logs = [],
+  currentTool = null,
+  resources = [],
 
 }: DebugPanelProps) {
   return (

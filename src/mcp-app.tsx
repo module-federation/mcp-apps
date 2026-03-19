@@ -6,10 +6,10 @@ import { DebugPanel, DebugToolbarButton } from './debug/debug-panel';
 import { injectGlobalStyles } from './styles/styles';
 import './utils/console-logger';
 import { ErrorBoundary } from './components/error-boundary';
-import type { AppData, ResourceData, ToolData } from './utils/types';
+import type { AppData, ToolData } from './utils/types';
 import { AppList } from './components/app-list';
-import { ComponentRenderer } from './components/component-renderer';
-import { loadRemoteComponent } from './loaders/mf-loader';
+import { RemoteComponentContainer } from './components/remote-component-container';
+import { MFProvider } from './context/MFProvider';
 import './styles/mcp-app.css';
 
 // Inject global styles
@@ -18,24 +18,8 @@ injectGlobalStyles();
 function ModuleFederationApp() {
   const [displayMode, setDisplayMode] = useState<'inline' | 'fullscreen'>('inline');
   const [apps, setApps] = useState<AppData[]>([]);
-  const [resources, setResources] = useState<ResourceData[]>([]);
   const [currentTool, setCurrentTool] = useState<ToolData | null>(null);
   const [showMFComponent, setShowMFComponent] = useState(false);
-  // loadKey increments on every tool call — sole trigger for the load effect
-  const [loadKey, setLoadKey] = useState(0);
-  const [isLoadingMF, setIsLoadingMF] = useState(false);
-  const [mfError, setMfError] = useState<string | null>(null);
-  const [RemoteComponent, setRemoteComponent] = useState<any>(null);
-  
-  // Cache MF instance and snapshot
-  const mfInstanceRef = useRef<any>(null);
-  const snapshotCacheRef = useRef<Map<string, any>>(new Map());
-  const lastRemoteNameRef = useRef<string>('');
-  // Keeps the latest resource so the loadKey-triggered effect can read it
-  // without resources being in deps (avoids re-trigger on reference change)
-  const latestResourceRef = useRef<any>(null);
-  // Guard against re-entrant ontoolresult calls with identical payload
-  const lastResourceKeyRef = useRef<string>('');
   
   // Debug state (dev only)
   const [showDebugPanel, setShowDebugPanel] = useState(false);
@@ -67,12 +51,12 @@ function ModuleFederationApp() {
   }, [displayMode, toggleFullscreen]);
   
   // Append a log entry (capped at 20 entries)
-  const addLog = (msg: string) => {
+  const addLog = useCallback((msg: string) => {
     const timestamp = new Date().toLocaleTimeString();
     const logMsg = `[${timestamp}] ${msg}`;
     console.log(logMsg);
     setLogs(prev => [...prev, logMsg].slice(-20)); // Keep last 20 entries
-  };
+  }, []);
   const appRef = useRef<App | null>(null);
 
   const { app, error, isConnected } = useApp({
@@ -104,6 +88,15 @@ function ModuleFederationApp() {
         let parsed: any;
         try { parsed = JSON.parse(textContent.text); } catch { return; }
 
+        // Handle app list
+        if (Array.isArray(parsed)) {
+          setApps(parsed); return;
+        }
+        if (parsed.apps) {
+          setApps(parsed.apps); return;
+        }
+
+        // Handle tool with resource
         let resource: any = null;
         if (parsed.tool && parsed.resource) {
           resource = parsed.resource;
@@ -111,29 +104,13 @@ function ModuleFederationApp() {
         } else if (parsed.tool && parsed.config?.resource) {
           resource = parsed.config.resource;
           setCurrentTool(parsed);
-        } else if (Array.isArray(parsed)) {
-          setApps(parsed); return;
-        } else if (parsed.apps) {
-          setApps(parsed.apps); return;
         } else {
           return;
         }
 
-        // Re-entrant guard: skip if this is the exact same resource payload
-        // that already triggered a load (happens when multiple bridges fire
-        // sendToolResult for the same iframe reload)
-        const resourceKey = parsed.tool + '::' + (resource?.moduleFederation?.remoteEntry ?? '') + '::' + JSON.stringify(parsed.args);
-        if (resourceKey === lastResourceKeyRef.current) {
-          console.log('[mcp-app] ⏭️ Skipping duplicate ontoolresult');
-          return;
-        }
-        lastResourceKeyRef.current = resourceKey;
-
-        console.log('[mcp-app] ✅ triggering load for', parsed.tool);
-        latestResourceRef.current = resource;
-        setResources([resource]);
+        // Show component and trigger render
+        console.log('[mcp-app] ✅ tool result received for', parsed.tool);
         setShowMFComponent(true);
-        setLoadKey(k => k + 1);
       };
 
       app.onteardown = async () => ({});
@@ -147,44 +124,7 @@ function ModuleFederationApp() {
     },
   });
 
-  // Load Module Federation remote component.
-  // Depends only on loadKey — loadKey is incremented exclusively by ontoolresult,
-  // preventing re-triggers caused by resources reference changes.
-  useEffect(() => {
-    if (loadKey === 0) return;
-    console.log(`🔄 [useEffect] triggered loadKey=${loadKey}`);
 
-    const resource = latestResourceRef.current;
-    if (!resource?.moduleFederation) return;
-
-    setIsLoadingMF(true);
-    setMfError(null);
-    setRemoteComponent(null);
-    setLogs([]);
-
-    (async () => {
-      try {
-        if (!app) throw new Error('MCP app not initialized');
-
-        const Component = await loadRemoteComponent({
-          config: resource.moduleFederation,
-          addLog,
-          mfInstanceRef,
-          snapshotCacheRef,
-          lastRemoteNameRef,
-        });
-
-        setRemoteComponent(() => Component);
-        setIsLoadingMF(false);
-      } catch (err: any) {
-        console.error('[MF Error]', err);
-        addLog(`❌ Load failed: ${err.message}`);
-        setMfError(err?.message || String(err));
-        setIsLoadingMF(false);
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadKey]);
 
   if (error) {
     return (
@@ -230,32 +170,30 @@ function ModuleFederationApp() {
           isConnected={isConnected}
           app={app}
           showMFComponent={showMFComponent}
-          isLoadingMF={isLoadingMF}
-          RemoteComponent={RemoteComponent}
-          mfError={mfError}
-          logs={logs}
           currentTool={currentTool}
-          resources={resources}
           onToggle={() => setShowDebugPanel(!showDebugPanel)}
         />
       )}
 
       <AppList apps={apps} displayMode={displayMode} />
 
-      <ComponentRenderer 
-        isLoadingMF={isLoadingMF}
-        mfError={mfError}
-        RemoteComponent={RemoteComponent}
-        currentTool={currentTool}
-        addLog={addLog}
-        app={app}
-      />
+      {/* Render remote component when tool is available */}
+      {showMFComponent && currentTool?.config?.resource?.moduleFederation && (
+        <RemoteComponentContainer
+          config={currentTool.config.resource.moduleFederation}
+          args={currentTool.args}
+          mcpApp={app}
+          onLog={addLog}
+        />
+      )}
     </main>
   );
 }
 
 createRoot(document.body).render(
   <ErrorBoundary>
-    <ModuleFederationApp />
+    <MFProvider>
+      <ModuleFederationApp />
+    </MFProvider>
   </ErrorBoundary>
 );

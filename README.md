@@ -80,6 +80,78 @@ In short: MF provides the UI delivery infrastructure that MCP Apps needs, withou
 > The MCP Apps spec version this package implements is **1.1.x** (Streamable HTTP + `text/html;profile=mcp-app` resource MIME type).
 > Hosts that do not support the MCP Apps spec still receive plain-text tool responses — the UI is simply not rendered.
 
+## Renderer API (for MF module developers)
+
+If you want to reuse the same remote rendering capability in your own app, import from:
+
+```ts
+@module-federation/mcp-apps/renderer
+```
+
+This entry exports:
+
+- `MFProvider`
+- `useRemoteComponent`
+- `RemoteComponentContainer`
+- `ModuleFederationConfig` (types)
+
+Minimal example:
+
+```tsx
+import { MFProvider, RemoteComponentContainer } from '@module-federation/mcp-apps/renderer';
+
+export function App({ mcpApp }: { mcpApp?: any }) {
+  return (
+    <MFProvider>
+      <RemoteComponentContainer
+        config={{
+          remoteName: 'demo_provider',
+          remoteEntry: 'http://localhost:8080/mf-manifest.json',
+          module: './DeployWizardStep1',
+          exportName: 'default',
+          manifestType: 'mf',
+        }}
+        args={{}}
+        mcpApp={mcpApp}
+      />
+    </MFProvider>
+  );
+}
+```
+
+Advanced example (custom loading/error with `useRemoteComponent`):
+
+```tsx
+import { MFProvider, useRemoteComponent } from '@module-federation/mcp-apps/renderer';
+
+function MyRemotePanel({ mcpApp }: { mcpApp?: any }) {
+  const { component: RemoteComponent, isLoading, error } = useRemoteComponent({
+    config: {
+      remoteName: 'demo_provider',
+      remoteEntry: 'http://localhost:8080/mf-manifest.json',
+      module: './DeployWizardStep2',
+      exportName: 'default',
+      manifestType: 'mf',
+    },
+    onLog: console.log,
+  });
+
+  if (isLoading) return <div>Loading remote module...</div>;
+  if (error) return <div>Failed to load remote module: {error}</div>;
+  if (!RemoteComponent) return null;
+
+  return <RemoteComponent mcpApp={mcpApp} env="prod" />;
+}
+
+export function App({ mcpApp }: { mcpApp?: any }) {
+  return (
+    <MFProvider>
+      <MyRemotePanel mcpApp={mcpApp} />
+    </MFProvider>
+  );
+}
+```
+
 ## Try the Demo
 
 The repo includes a ready-to-run Module Federation provider with a **Deploy Wizard** demo.

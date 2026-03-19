@@ -13,9 +13,8 @@
 import {
   initializeVMOK,
   loadAndInjectSnapshot,
-  generateSnapshotUrl,
   fixProtocolRelativeUrl,
-} from './snapshot-loader';
+} from './snapshot-loader.js';
 
 export interface VmokSetupOptions {
   remoteEntry: string;
