@@ -158,6 +158,9 @@ export async function createServer({ configPath, devMode = false, shellBaseUrl }
           module: toolConfig.module,
           exportName: toolConfig.exportName || 'default',
           manifestType,
+          // The HTTP base URL of this MCP server (undefined in stdio mode).
+          // Hosts use this to forward callServerTool requests back to the server.
+          mcpServerUrl: shellBaseUrl,
         },
         csp: remoteConfig.csp,
       };
