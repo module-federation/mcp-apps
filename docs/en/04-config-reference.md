@@ -171,6 +171,18 @@ Include:
 ]
 ```
 
+In addition to URLs, `resourceDomains` also accepts CSP source keywords needed by some Module Federation runtimes that use `eval()` to bootstrap remote code:
+
+- `"'unsafe-eval'"` — allows `eval()` and `new Function()` (single-quoted form recommended)
+- `"'wasm-unsafe-eval'"` — allows WebAssembly compilation
+
+```json
+"resourceDomains": [
+  "'unsafe-eval'",
+  "https://cdn.example.com"
+]
+```
+
 #### `csp.frameDomains` · string[] · optional
 
 Allowed iframe sources (maps to CSP `frame-src`). Rarely needed.
