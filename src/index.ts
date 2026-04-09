@@ -41,7 +41,18 @@ async function startStreamableHTTPServer(
   const express = (await import("express")).default;
   const distDir = new URL("../dist", import.meta.url).pathname;
   app.use("/static", express.static(path.join(distDir, "static")));
-
+  // Dedicated route: /sandbox.html
+  // Serves the outer sandbox proxy iframe required by the MCP Apps double-iframe
+  // architecture. The sandbox must be served from this origin (different from the
+  // host's origin) to enforce cross-origin isolation for the inner app iframe.
+  app.get("/sandbox.html", async (_req: Request, res: Response) => {
+    try {
+      const html = await fs.readFile(path.join(distDir, "sandbox.html"), "utf-8");
+      res.type("html").send(html);
+    } catch {
+      res.status(404).send("sandbox.html not found — run pnpm build");
+    }
+  });
   // Dedicated route: /static/mcp-app-shell.html
   // express.static above serves dist/static/* but mcp-app-shell.html lives in
   // dist/ (root). We serve it here with __MF_MCP_BASE__ already replaced so

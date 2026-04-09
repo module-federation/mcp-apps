@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: none;
+      flex-grow: 1;
+      /* Inherit color scheme from parent for consistent transparency */
+      color-scheme: inherit;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    (function () {
+      'use strict';
+
+      // Security: must be embedded as an iframe, never loaded as top-level page.
+      if (window.self === window.top) {
+        throw new Error('This file is only to be used in an iframe sandbox.');
+      }
+
+      if (!document.referrer) {
+        throw new Error('No referrer, cannot validate embedding site.');
+      }
+
+      // Accept any HTTP/HTTPS origin — the security guarantee comes from
+      // cross-origin isolation (sandbox on a different port/domain from the host),
+      // not from referrer filtering. Update this pattern to restrict to specific
+      // domains in high-security environments.
+      var ALLOWED_REFERRER_PATTERN = /^https?:\/\//;
+
+      if (!document.referrer.match(ALLOWED_REFERRER_PATTERN)) {
+        throw new Error(
+          'Embedding domain not allowed: ' + document.referrer +
+          '. Update ALLOWED_REFERRER_PATTERN in sandbox.html to allow your domain.'
+        );
+      }
+
+      // Extract the expected host origin from the referrer for origin validation.
+      var EXPECTED_HOST_ORIGIN = new URL(document.referrer).origin;
+      var OWN_ORIGIN = new URL(window.location.href).origin;
+
+      // Security self-test: verify iframe isolation is working correctly.
+      // This MUST throw a SecurityError — if window.top is accessible, the sandbox
+      // configuration is dangerously broken and untrusted content could escape.
+      try {
+        window.top.alert('If you see this, the sandbox is not set up securely.');
+        throw 'FAIL';
+      } catch (e) {
+        if (e === 'FAIL') {
+          throw new Error('The sandbox is not set up securely.');
+        }
+        // Expected: SecurityError confirms proper sandboxing.
+      }
+
+      // Double-iframe sandbox architecture: this file is the outer sandbox proxy
+      // iframe on a separate origin. It creates an inner iframe for untrusted HTML
+      // content. The Host and the Sandbox MUST have different origins.
+      var inner = document.createElement('iframe');
+      inner.style.cssText = 'width:100%;height:100%;border:none;';
+      inner.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-forms');
+      document.body.appendChild(inner);
+
+      var RESOURCE_READY_NOTIFICATION = 'ui/notifications/sandbox-resource-ready';
+      var PROXY_READY_NOTIFICATION = 'ui/notifications/sandbox-proxy-ready';
+
+      function buildAllowAttribute(permissions) {
+        if (!permissions) return '';
+        var list = [];
+        if (permissions.camera) list.push('camera');
+        if (permissions.microphone) list.push('microphone');
+        if (permissions.geolocation) list.push('geolocation');
+        if (permissions.clipboardWrite) list.push('clipboard-write');
+        return list.join('; ');
+      }
+
+      // Message relay: this Sandbox (outer iframe) acts as a bidirectional bridge,
+      // forwarding messages between:
+      //   Host (parent window) <-> Sandbox (outer frame) <-> View (inner iframe)
+      //
+      // The "ui/notifications/sandbox-resource-ready" message is intercepted here
+      // (not relayed) to configure and load the inner iframe with the view HTML.
+      window.addEventListener('message', function (event) {
+        if (event.source === window.parent) {
+          // Validate messages from parent come from the expected host origin.
+          if (event.origin !== EXPECTED_HOST_ORIGIN) {
+            console.error(
+              '[Sandbox] Rejecting message from unexpected origin:', event.origin,
+              'expected:', EXPECTED_HOST_ORIGIN
+            );
+            return;
+          }
+
+          if (event.data && event.data.method === RESOURCE_READY_NOTIFICATION) {
+            var params = event.data.params;
+            var html = params.html;
+            var sandbox = params.sandbox;
+            var permissions = params.permissions;
+
+            if (typeof sandbox === 'string') {
+              inner.setAttribute('sandbox', sandbox);
+            }
+
+            var allowAttr = buildAllowAttribute(permissions);
+            if (allowAttr) {
+              inner.setAttribute('allow', allowAttr);
+            }
+
+            if (typeof html === 'string') {
+              // Use document.write instead of srcdoc so absolute script URLs work correctly.
+              var doc = inner.contentDocument || (inner.contentWindow && inner.contentWindow.document);
+              if (doc) {
+                doc.open();
+                doc.write(html);
+                doc.close();
+              } else {
+                // Fallback: srcdoc
+                console.warn('[Sandbox] document.write not available, falling back to srcdoc');
+                inner.srcdoc = html;
+              }
+            }
+          } else {
+            // Relay all other messages from host to inner iframe.
+            if (inner && inner.contentWindow) {
+              inner.contentWindow.postMessage(event.data, '*');
+            }
+          }
+        } else if (event.source === inner.contentWindow) {
+          // Validate messages from inner iframe come from the same origin.
+          if (event.origin !== OWN_ORIGIN) {
+            console.error(
+              '[Sandbox] Rejecting message from inner iframe with unexpected origin:', event.origin,
+              'expected:', OWN_ORIGIN
+            );
+            return;
+          }
+          // Relay messages from inner frame to parent window.
+          window.parent.postMessage(event.data, EXPECTED_HOST_ORIGIN);
+        }
+      });
+
+      // Notify the Host that the Sandbox is ready to receive view HTML.
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: PROXY_READY_NOTIFICATION,
+        params: {}
+      }, EXPECTED_HOST_ORIGIN);
+    })();
+  </script>
+</body>
+</html>
