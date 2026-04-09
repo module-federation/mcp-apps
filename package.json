@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/mcp-apps",
-  "version": "0.0.7-alpha.1",
+  "version": "0.0.7-alpha.2",
   "type": "module",
   "description": "MCP Apps Server for rendering Module Federation components as interactive UIs in AI Agents",
   "license": "MIT",
@@ -62,7 +62,7 @@
     }
   },
   "scripts": {
-    "build": "rm -rf dist/ && pnpm run build:ui && tsc && chmod +x dist/index.js && mkdir -p dist/styles && cp src/styles/*.css dist/styles/",
+    "build": "rm -rf dist/ && pnpm run build:ui && tsc && chmod +x dist/index.js && mkdir -p dist/styles && cp src/styles/*.css dist/styles/ && cp src/sandbox.html dist/sandbox.html",
     "build:check": "tsc --noEmit && pnpm run build:ui && tsc && chmod +x dist/index.js",
     "build:ui": "rsbuild build && rsbuild build --config rsbuild.shell.config.ts",
     "watch:ui": "rsbuild build --watch",
