@@ -44,6 +44,12 @@ export interface McpAppRendererProps {
   hostInfo?: { name: string; version: string };
   /** Initial iframe height in px (default: 400) */
   initialHeight?: number;
+  /**
+   * Called when the MCP App sends a ui/message request (e.g. to trigger the
+   * next step in a multi-step flow). The host should relay this as a new chat
+   * message so the agent can respond.
+   */
+  onMessage?: (params: { role: string; content: Array<{ type: string; text: string }> }) => void;
 }
 
 const DEFAULT_HOST_INFO = { name: 'mcp-app-host', version: '1.0.0' };
@@ -75,6 +81,7 @@ export const McpAppRenderer = ({
   messageId,
   hostInfo = DEFAULT_HOST_INFO,
   initialHeight = 400,
+  onMessage,
 }: McpAppRendererProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const bridgeRef = useRef<AppBridge | null>(null);
@@ -125,7 +132,10 @@ export const McpAppRenderer = ({
         if (h !== undefined) setHeight(h);
       };
 
-      bridge.onmessage = (_params) => Promise.resolve({});
+      bridge.onmessage = (params) => {
+        onMessage?.(params as any);
+        return Promise.resolve({});
+      };
 
       bridge.onopenlink = ({ url }) => {
         window.open(url, '_blank', 'noopener,noreferrer');
