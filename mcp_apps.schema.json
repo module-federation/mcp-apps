@@ -56,7 +56,7 @@
               "resourceDomains": {
                 "type": "array",
                 "items": { "type": "string" },
-                "description": "Allowed domains for loading resources"
+                "description": "Allowed domains for loading resources (script-src). Also accepts CSP keywords: 'unsafe-eval', 'wasm-unsafe-eval'"
               }
             }
           }

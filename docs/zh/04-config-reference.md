@@ -174,6 +174,18 @@ Content Security Policy 配置，控制 iframe 内可以访问的域名。
 ]
 ```
 
+除 URL 外，`resourceDomains` 还接受 CSP 来源关键字——某些 Module Federation 运行时使用 `eval()` 来引导远程代码，需要声明这些关键字：
+
+- `"'unsafe-eval'"` — 允许 `eval()` 和 `new Function()`（推荐使用带单引号的写法）
+- `"'wasm-unsafe-eval'"` — 允许 WebAssembly 编译
+
+```json
+"resourceDomains": [
+  "'unsafe-eval'",
+  "https://cdn.example.com"
+]
+```
+
 #### `csp.frameDomains` · string[] · 可选
 
 允许加载的 iframe 来源（对应 CSP `frame-src`）。一般不需要设置。

@@ -21,6 +21,30 @@ const CspDomainSchema = z.string().refine(
   { message: 'CSP domain must start with "https://", "http://", or "*." — bare hostnames like "localhost:3001" are silently ignored by the browser' }
 );
 
+/**
+ * Resource domains (mapped to script-src / style-src by MCP hosts) may also
+ * contain CSP source keywords required by some Module Federation runtimes
+ * that evaluate remote bootstrap code via `new Function()` / `eval()`.
+ *
+ * Accepted keywords (with or without the single-quote wrapper):
+ *   - 'unsafe-eval'       /  unsafe-eval
+ *   - 'wasm-unsafe-eval'  /  wasm-unsafe-eval
+ *
+ * The single-quoted form is recommended because MCP hosts pass resourceDomains
+ * values directly into the CSP header where keywords MUST be quoted.
+ */
+const CSP_KEYWORDS = new Set([
+  'unsafe-eval',
+  'wasm-unsafe-eval',
+  "'unsafe-eval'",
+  "'wasm-unsafe-eval'",
+]);
+
+const CspResourceDomainSchema = z.string().refine(
+  (d) => d.startsWith('https://') || d.startsWith('http://') || d.startsWith('*.') || CSP_KEYWORDS.has(d),
+  { message: 'CSP resource domain must be a URL (https://, http://, *.) or a CSP keyword: \'unsafe-eval\', \'wasm-unsafe-eval\'' }
+);
+
 // Remote configuration schema
 const RemoteConfigSchema = z.object({
   name: z.string().min(1, 'Remote name cannot be empty'),
@@ -33,7 +57,7 @@ const RemoteConfigSchema = z.object({
   snapshotUrl: z.string().url('Invalid snapshot URL format').optional(),
   csp: z.object({
     connectDomains: z.array(CspDomainSchema).min(1, 'At least one connect domain required'),
-    resourceDomains: z.array(CspDomainSchema).min(1, 'At least one resource domain required'),
+    resourceDomains: z.array(CspResourceDomainSchema).min(1, 'At least one resource domain required'),
     frameDomains: z.array(CspDomainSchema).optional(),
     baseUriDomains: z.array(CspDomainSchema).optional(),
   }),
