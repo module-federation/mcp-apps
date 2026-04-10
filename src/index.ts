@@ -25,19 +25,16 @@ import { createServer } from "./server.js";
  * @param createServerFn - Factory function that creates a new McpServer instance per request.
  */
 async function startStreamableHTTPServer(
-  createServerFn: (shellBaseUrl?: string) => Promise<McpServer>,
+  createServerFn: (httpBaseUrl?: string) => Promise<McpServer>,
 ): Promise<void> {
   const port = parseInt(process.env.PORT ?? "3001", 10);
-  // MF_MCP_BASE_URL allows overriding the public base URL when running behind a
+  // MF_MCP_BASE_URL allows overriding the public base URL when running behind a reverse proxy.
   // Falls back to http://localhost:{port} for local development.
-  const shellBaseUrl = process.env.MF_MCP_BASE_URL?.replace(/\/$/, '') ?? `http://localhost:${port}`;
+  const httpBaseUrl = process.env.MF_MCP_BASE_URL?.replace(/\/$/, '') ?? `http://localhost:${port}`;
 
   const app = createMcpExpressApp({ host: "0.0.0.0" });
   app.use(cors());
 
-  // Serve built JS/CSS assets from dist/static/ at /static so the iframe
-  // (shell HTML mode) can load them via absolute URLs like
-  // http://localhost:{port}/static/js/mcp-app-shell.js
   const express = (await import("express")).default;
   const distDir = new URL("../dist", import.meta.url).pathname;
   app.use("/static", express.static(path.join(distDir, "static")));
@@ -53,27 +50,6 @@ async function startStreamableHTTPServer(
       res.status(404).send("sandbox.html not found — run pnpm build");
     }
   });
-  // Dedicated route: /static/mcp-app-shell.html
-  // express.static above serves dist/static/* but mcp-app-shell.html lives in
-  // dist/ (root). We serve it here with __MF_MCP_BASE__ already replaced so
-  // external hosts (e.g. ai-paas) can load it directly via <iframe src=>.
-  app.get("/static/mcp-app-shell.html", async (req: Request, res: Response) => {
-    try {
-      const raw = await fs.readFile(path.join(distDir, "mcp-app-shell.html"), "utf-8");
-      // Derive the real public origin from the request so this works behind
-      // reverse proxies (e.g. https://o1qeqmry.fn.bytedance.net) without
-      // needing to configure MF_MCP_BASE_URL.
-      // X-Forwarded-Proto/Host are set by most proxies; fall back to req.protocol/host.
-      const proto = (req.headers['x-forwarded-proto'] as string | undefined)?.split(',')[0].trim() ?? req.protocol;
-      const host = (req.headers['x-forwarded-host'] as string | undefined)?.split(',')[0].trim() ?? req.get('host') ?? `localhost:${port}`;
-      const requestBase = `${proto}://${host}`;
-      const html = raw.replaceAll("__MF_MCP_BASE__", requestBase);
-      res.type("html").send(html);
-    } catch {
-      res.status(404).send("mcp-app-shell.html not found — run pnpm build:ui");
-    }
-  });
-
   // Also serve dist/mcp-app.html at /static/mcp-app.html for backwards compat
   // with hosts that still reference the old full-inline URL.
   app.get("/static/mcp-app.html", async (_req: Request, res: Response) => {
@@ -87,7 +63,7 @@ async function startStreamableHTTPServer(
 
   // Standard Streamable HTTP endpoint (SSE response) — for Claude Desktop / standard MCP clients
   app.all("/mcp", async (req: Request, res: Response) => {
-    const server = await createServerFn(shellBaseUrl);
+    const server = await createServerFn(httpBaseUrl);
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
@@ -118,7 +94,7 @@ async function startStreamableHTTPServer(
   // and expects a plain JSON response like { jsonrpc, id, result }
   app.post("/mcp-rpc", async (req: Request, res: Response) => {
     try {
-      const server = await createServerFn(shellBaseUrl);
+      const server = await createServerFn(httpBaseUrl);
       const requestBody = req.body;
 
       // JSON-RPC notifications have no `id`. The MCP server processes them but
@@ -197,10 +173,8 @@ async function startStreamableHTTPServer(
  * @param createServerFn - Factory function that creates a new McpServer instance.
  */
 async function startStdioServer(
-  createServerFn: (shellBaseUrl?: string) => Promise<McpServer>,
+  createServerFn: (httpBaseUrl?: string) => Promise<McpServer>,
 ): Promise<void> {
-  // In stdio mode there is no HTTP server, so no shellBaseUrl — the full
-  // self-contained mcp-app.html is served inline.
   const server = await createServerFn(undefined);
   await server.connect(new StdioServerTransport());
   console.error('[MF MCP] Server started via stdio');
@@ -228,7 +202,7 @@ async function main() {
 
   const devMode = args.includes('--dev') || process.env.NODE_ENV === 'development';
 
-  const factory = (shellBaseUrl?: string) => createServer({ configPath, devMode, shellBaseUrl });
+  const factory = (httpBaseUrl?: string) => createServer({ configPath, devMode, httpBaseUrl });
 
   if (args.includes("--stdio")) {
     await startStdioServer(factory);

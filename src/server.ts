@@ -15,34 +15,8 @@ const DIST_DIR = import.meta.filename.endsWith(".ts")
 // In dev mode (--dev flag or NODE_ENV=development) caching is disabled so that
 // rebuilding the UI is visible immediately without restarting the MCP server.
 let cachedMcpAppHtml: string | null = null;
-// Cache for the shell HTML (HTTP mode). The placeholder __MF_MCP_BASE__ is already
-// replaced with the actual base URL when stored here.
-let cachedShellHtml: string | null = null;
 
-async function getMcpAppHtml(devMode: boolean, shellBaseUrl?: string): Promise<string> {
-  // HTTP mode: serve the tiny shell HTML (~1 KB) that loads JS from
-  // /static/js/mcp-app.js via an absolute URL.  Falls back to the full
-  // inline HTML if the shell file doesn't exist (e.g. old build artefact).
-  if (shellBaseUrl) {
-    if (devMode || !cachedShellHtml) {
-      const shellPath = path.join(DIST_DIR, 'mcp-app-shell.html');
-      try {
-        const raw = await fs.readFile(shellPath, 'utf-8');
-        // Replace the build-time placeholder with the real server origin.
-        const shell = raw.replaceAll('__MF_MCP_BASE__', shellBaseUrl);
-        if (!devMode) cachedShellHtml = shell;
-        const logLabel = devMode ? '🔄 [dev] Re-read' : '📂 Loaded';
-        console.error(`[MF MCP] ${logLabel} mcp-app-shell.html (${shell.length} bytes, base: ${shellBaseUrl})`);
-        return shell;
-      } catch {
-        console.error('[MF MCP] ⚠️  mcp-app-shell.html not found, falling back to full mcp-app.html. Run `pnpm build:ui` to generate the shell.');
-        // fall through to full HTML
-      }
-    } else if (cachedShellHtml) {
-      return cachedShellHtml;
-    }
-  }
-
+async function getMcpAppHtml(devMode: boolean): Promise<string> {
   if (devMode) {
     // Always re-read from disk in dev mode
     const htmlPath = path.join(DIST_DIR, 'mcp-app.html');
@@ -95,23 +69,19 @@ export interface CreateServerOptions {
   devMode?: boolean;
   /**
    * HTTP server base URL (e.g. `http://localhost:3001`).
-   * When set, `resources/read` returns the tiny `mcp-app-shell.html` (~1 KB)
-   * that loads JS/CSS from `{shellBaseUrl}/static/...` instead of the full
-   * self-contained 686 KB inline HTML.
+   * Passed as `mcpServerUrl` in tool results so that hosts can load
+   * `/sandbox.html` from the correct origin for cross-origin isolation.
    * Leave undefined in stdio mode (no HTTP server available).
    */
-  shellBaseUrl?: string;
+  httpBaseUrl?: string;
 }
 
 /**
  * Create and configure the MCP server
  */
-export async function createServer({ configPath, devMode = false, shellBaseUrl }: CreateServerOptions): Promise<McpServer> {
+export async function createServer({ configPath, devMode = false, httpBaseUrl }: CreateServerOptions): Promise<McpServer> {
   if (devMode) {
     console.error('[MF MCP] ⚡ Dev mode enabled — mcp-app.html cache disabled. Rebuild the UI to see changes without restarting.');
-  }
-  if (shellBaseUrl) {
-    console.error(`[MF MCP] 🌐 HTTP mode — UI loaded from ${shellBaseUrl}/static (shell HTML, not inline)`);
   }
 
   const config = await loadConfig(configPath);
@@ -159,8 +129,8 @@ export async function createServer({ configPath, devMode = false, shellBaseUrl }
           exportName: toolConfig.exportName || 'default',
           manifestType,
           // The HTTP base URL of this MCP server (undefined in stdio mode).
-          // Hosts use this to forward callServerTool requests back to the server.
-          mcpServerUrl: shellBaseUrl,
+          // Hosts use this to load /sandbox.html for cross-origin isolation.
+          mcpServerUrl: httpBaseUrl,
         },
         csp: remoteConfig.csp,
       };
@@ -232,10 +202,6 @@ export async function createServer({ configPath, devMode = false, shellBaseUrl }
       { mimeType: RESOURCE_MIME_TYPE },
       async () => {
         console.error('[MF MCP] 📖 Resource requested:', uri);
-        // Always return the full self-contained mcp-app.html bundle (no shellBaseUrl).
-        // Shell HTML loads JS via external <script src> which causes SDK version
-        // mismatches when injected into AppBridge double-iframe sandboxes.
-        // The shell optimization is only suitable for direct iframe embedding.
         const html = await getMcpAppHtml(devMode);
         return {
           contents: [{ uri, mimeType: RESOURCE_MIME_TYPE, text: html, _meta: { ui: { csp, prefersBorder: true } } }],
