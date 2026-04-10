@@ -232,7 +232,11 @@ export async function createServer({ configPath, devMode = false, shellBaseUrl }
       { mimeType: RESOURCE_MIME_TYPE },
       async () => {
         console.error('[MF MCP] 📖 Resource requested:', uri);
-        const html = await getMcpAppHtml(devMode, shellBaseUrl);
+        // Always return the full self-contained mcp-app.html bundle (no shellBaseUrl).
+        // Shell HTML loads JS via external <script src> which causes SDK version
+        // mismatches when injected into AppBridge double-iframe sandboxes.
+        // The shell optimization is only suitable for direct iframe embedding.
+        const html = await getMcpAppHtml(devMode);
         return {
           contents: [{ uri, mimeType: RESOURCE_MIME_TYPE, text: html, _meta: { ui: { csp, prefersBorder: true } } }],
         };
