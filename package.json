@@ -1,6 +1,6 @@
 {
   "name": "@module-federation/mcp-apps",
-  "version": "0.0.7-alpha.2",
+  "version": "0.0.7-alpha.3",
   "type": "module",
   "description": "MCP Apps Server for rendering Module Federation components as interactive UIs in AI Agents",
   "license": "MIT",
